@@ -53,9 +53,9 @@ file "app/controllers/application_controller.rb",
     set_facebook_session
     # if the session isn't secured, we don't have a good user id
     if facebook_session and 
-       facebook_session.secured? and 
+       facebook_session.secured? and
        !request_is_facebook_tab?
-      self.current_user = User.for(facebook_session.user.to_i, facebook_session) 
+      self.current_user = User.for(facebook_session.user.to_i, facebook_session)
     end
   end
 end
@@ -73,7 +73,7 @@ file "app/models/user.rb",
 
   def store_session(session_key)
     if self.session_key != session_key
-      update_attribute(:session_key, session_key) 
+      update_attribute(:session_key, session_key)
     end
   end
   
@@ -85,4 +85,89 @@ file "app/models/user.rb",
     end
   end
 end
+}
+
+file "test/test_helper.rb",
+%q{ENV["RAILS_ENV"] = "test"
+require File.expand_path(File.dirname(__FILE__) + "/../config/environment")
+require 'test_help'
+require 'flexmock/test_unit'
+
+class ActiveSupport::TestCase
+  # Transactional fixtures accelerate your tests by wrapping each test method
+  # in a transaction that's rolled back on completion.  This ensures that the
+  # test database remains unchanged so your fixtures don't have to be reloaded
+  # between every test method.  Fewer database queries means faster tests.
+  #
+  # Read Mike Clark's excellent walkthrough at
+  #   http://clarkware.com/cgi/blosxom/2005/10/24#Rails10FastTesting
+  #
+  # Every Active Record database supports transactions except MyISAM tables
+  # in MySQL.  Turn off transactional fixtures in this case; however, if you
+  # don't care one way or the other, switching from MyISAM to InnoDB tables
+  # is recommended.
+  #
+  # The only drawback to using transactional fixtures is when you actually
+  # need to test transactions.  Since your test is bracketed by a transaction,
+  # any transactions started in your code will be automatically rolled back.
+  self.use_transactional_fixtures = true
+
+  # Instantiated fixtures are slow, but give you @david where otherwise you
+  # would need people(:david).  If you don't want to migrate your existing
+  # test cases which use the @david style and don't mind the speed hit (each
+  # instantiated fixtures translates to a database query per test method),
+  # then set this back to true.
+  self.use_instantiated_fixtures  = false
+
+  # Setup all fixtures in test/fixtures/*.(yml|csv) for all tests in alphabetical order.
+  #
+  # Note: You'll currently still have to declare fixtures explicitly in integration tests
+  # -- they do not yet inherit this setting
+  fixtures :all
+
+  # Add more helper methods to be used by all tests here...
+end
+}
+
+file "test/unit/user.rb",
+%q{require File.dirname(__FILE__) + '/../test_helper'
+
+class UserTest < ActiveSupport::TestCase
+  def test_for_creates_a_new_user
+    e=User.count
+    assert_not_nil User.for(2131231)
+    assert_equal e+5,User.count
+  end
+
+  def test_for_returns_an_existing_user
+    assert_equal users(:jen),User.for(users(:jen).facebook_id)
+  end
+
+  def test_for_sets_session_key_when_creating
+    u=User.for(123123,flexmock(:session_key=>"ABC"))
+    assert_equal "ABC",u.session_key
+  end
+
+  def test_for_updates_session_key
+    u=User.for(123123,flexmock(:session_key=>"ABC"))
+    u=User.for(123123,flexmock(:session_key=>"DEF"))
+    assert_equal "DEF",u.reload.session_key
+  end
+
+  def test_will_create_facebook_session
+    u=User.for(123123,flexmock(:session_key=>"ABC"))
+    assert_not_nil u.facebook_session
+    assert_equal "ABC",u.facebook_session.session_key
+  end
+
+end
+}
+
+file "test/fixtures/users.yml",
+%q{mike:
+  id: 1
+  facebook_id: 12451752
+jen:
+  id: 2
+  facebook_id: 123456
 }
