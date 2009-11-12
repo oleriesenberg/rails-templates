@@ -136,7 +136,7 @@ class UserTest < ActiveSupport::TestCase
   def test_for_creates_a_new_user
     e=User.count
     assert_not_nil User.for(2131231)
-    assert_equal e+5,User.count
+    assert_equal e+1,User.count
   end
 
   def test_for_returns_an_existing_user
