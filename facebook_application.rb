@@ -12,6 +12,7 @@ db/*.sqlite3
 }
 
 plugin 'exception_notification', :git => 'git://github.com/rails/exception_notification.git'
+plugin 'jrails', :git => 'git://github.com/aaronchi/jrails.git' if yes?("\n\nInstall JRails?")
 
 rake("db:sessions:create") if yes?("\n\nUse ActiveRecord session store?")
 
