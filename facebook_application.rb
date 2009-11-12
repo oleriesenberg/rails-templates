@@ -129,7 +129,7 @@ class ActiveSupport::TestCase
 end
 }
 
-file "test/unit/user.rb",
+file "test/unit/user_test.rb",
 %q{require File.dirname(__FILE__) + '/../test_helper'
 
 class UserTest < ActiveSupport::TestCase
