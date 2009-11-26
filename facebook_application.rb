@@ -171,3 +171,10 @@ jen:
   id: 2
   facebook_id: 123456
 }
+
+
+
+
+git :init
+git :add => "."
+git :commit => "-a -m 'Initial commit'"
